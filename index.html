@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashlight Alarm</title>
+</head>
+<body>
+    <h1>Set Alarm with Flashlight</h1>
+    <label for="alarmTime">Set Alarm (HH:MM): </label>
+    <input type="time" id="alarmTime">
+    <button onclick="setAlarm()">Set Alarm</button>
+
+    <script>
+        let alarmTime = null;
+        let videoStream = null;
+
+        function setAlarm() {
+            alarmTime = document.getElementById("alarmTime").value;
+            checkAlarm();
+        }
+
+        async function turnOnFlashlight() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", torch: true } });
+                    const track = videoStream.getVideoTracks()[0];
+                    await track.applyConstraints({ advanced: [{ torch: true }] });
+                } catch (error) {
+                    console.error("Flashlight not supported on this device or permission denied", error);
+                }
+            }
+        }
+
+        function checkAlarm() {
+            const alarmCheckInterval = setInterval(() => {
+                const currentTime = new Date().toTimeString().slice(0, 5);
+                if (alarmTime === currentTime) {
+                    alert("Alarm!");
+                    turnOnFlashlight();
+                    clearInterval(alarmCheckInterval);
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
